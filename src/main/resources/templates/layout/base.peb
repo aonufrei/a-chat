@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{% block title %}{% endblock %}</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+          transparent: 'transparent',
+          current: 'currentColor',
+          'white': '#ffffff',
+          'bluish': {
+            100: '#A9FFF7',
+            200: '#94FBAB',
+            300: '#B8E1FF',
+            400: '#BCB6FF',
+            500: '#21897E',
+            },
+          'error': {
+            100: '#F45B6933',
+            300: '#F45B69',
+            }
+          }
+        }
+      }
+    }
+  </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+          .content-auto {
+            content-visibility: auto;
+          }
+        }
+    </style>
+</head>
+<body class="h-dvh flex flex-col">
+    <header>
+        {% block header %}{% endblock %}
+    </header>
+{% block content %}{% endblock %}
+</body>
+</html>

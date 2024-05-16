@@ -1,0 +1,121 @@
+{% extends "layout/base" %}
+{% block title %} A Chat | Messages {% endblock %}
+
+{% block header %}
+<div class="grid grid-cols-3 py-2 bg-bluish-500 mb-2">
+    <span class="pl-4"></span>
+    <span class="flex justify-center items-center">
+        <span class="text-xl text-bluish-100">A-Chat</span>
+    </span>
+    <span class="flex justify-end pr-4"><a class="cursor-pointer px-3 py-2 text-bluish-100 rounded transition-all hover:bg-error-300 hover:text-white" href="/logout">Log Out</a></span>
+</div>
+{% endblock %}
+
+{% block content %}
+        <div id="chat" class="flex-1 flex flex-col overflow-y-auto">
+            {% for message in messages %}
+        {% if currentUsername != message.from %}
+            <div class="flex flex-row py-2 px-2 hover:bg-gray-200">
+                <div class="flex flex-col px-4 py-2 max-w-[40%] rounded bg-bluish-500">
+                    <span class="text-sm mb-0.5 text-white font-bold">{{ message.from }}</span>
+                    <span class="text-white">
+                        {{ message.content }}
+                    </span>
+                </div>
+                <div></div>
+            </div>
+            {% else %}
+            <div class="flex flex-row-reverse py-2 px-2 hover:bg-gray-200">
+                <div class="flex flex-col px-4 py-2 max-w-[40%] rounded bg-bluish-500">
+                    <span class="text-sm mb-0.5 text-white font-bold">{{ message.from }}</span>
+                    <span class="text-white">
+                        {{ message.content }}
+                    </span>
+                </div>
+                <div></div>
+            </div>
+            {% endif %}
+        {% else %}
+                <p class="px-2 text-bluish-500">No messages yet</p>
+            {% endfor %}
+        </div>
+
+    <div class="flex px-4 py-2 bg-bluish-500 mt-2">
+        <input id="message_input" class="flex-1 px-4 py-2 text-lg text-bg-400 rounded-none" placeholder="Your message here" />
+        <button class="px-4 py-2 text-lg text-bluish-500 bg-bluish-100 transition-all rounded-none hover:text-bluish-500 hover:bg-bluish-200" onclick="send()">Send</button>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.2/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script>
+        const authToken = '{{ token }}'
+        const currentUsername = '{{ currentUsername }}'
+        const socket = new SockJS('/chat');
+        const stompClient = Stomp.over(socket);
+
+        $(document).ready(function(){
+            $(document).on('keydown', function(e) {
+                if(e.ctrlKey && e.keyCode == 13) {
+                    send()
+                }
+            });
+        });
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            stompClient.subscribe('/topic/public', function (message) {
+                showMessages(JSON.parse(message.body));
+            });
+        });
+
+        function showMessages(messages) {
+            console.log(messages)
+            const prepared = messages.map(msg => {
+                if (currentUsername !== msg.from) {
+                    return `<div class="flex flex-row py-2 px-2 hover:bg-gray-200">
+                        <div class="flex flex-col px-4 py-2 max-w-[40%] rounded bg-bluish-500">
+                            <span class="text-sm mb-0.5 text-white font-bold">${msg.from}</span>
+                            <span class="text-white">
+                                ${msg.content}
+                            </span>
+                        </div>
+                        <div></div>
+                    </div>`
+                }
+                return `<div class="flex flex-row-reverse py-2 px-2 hover:bg-gray-200">
+                    <div class="flex flex-col px-4 py-2 max-w-[40%] rounded bg-bluish-500">
+                        <span class="text-sm mb-0.5 text-right text-white font-bold">${msg.from}</span>
+                        <span class="text-white">
+                            ${msg.content}
+                        </span>
+                    </div>
+                    <div></div>
+                </div>`
+            }).join('')
+            const chat = $('#chat')
+            chat.empty()
+            chat.append(!prepared ? '<p class="px-2 text-bluish-500">No messages yet</p>' : prepared)
+            chat.scrollTop(chat.height())
+        }
+
+        function send() {
+            const msgInput = $('#message_input');
+            const content = msgInput.val()
+            msgInput.val('')
+            if (!content) return;
+            console.log('Sending message')
+
+            $.ajax({
+                type: "POST",
+                url: '/api/v1/messages',
+                headers: {
+                    Authorization: `${authToken}`
+                },
+                data: JSON.stringify({ content: content }),
+                contentType: "application/json",
+                success: () => { console.log("Successfully sent message") },
+            });
+        }
+    </script>
+{% endblock %}

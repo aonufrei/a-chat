@@ -1,0 +1,33 @@
+{% extends "layout/base" %}
+
+{% block title %} A Chat | Login {% endblock %}
+
+{% block header %}
+<div class="flex justify-center items-center py-2 bg-bluish-500">
+    <span class="text-xl text-bluish-100">A-Chat</span>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="flex-1 flex justify-center items-center">
+    <form class="block" action="/login" method="post">
+        <h2 class="text-xl text-center">Login:</h2>
+        <div class="mb-2">
+            <label class="block w-full">Username: </label>
+            <input class="block w-full p-2 border border-bluish-500" id="username" name="username" placeholder="Your username" required/>
+        </div>
+        <div class="mb-2">
+            <label class="block w-full">Password: </label>
+            <input class="block w-full p-2 border border-bluish-500" id="password" name="password" type="password" placeholder="Your password" required/>
+        </div>
+        {% if failed %}
+            <div class="py-3 mb-2 px-2 break-words border border-error-300 bg-error-100 flex justify-center items-center w-full">
+                <span class="text-error-300">Username or password is incorrect</span>
+            </div>
+        {% endif %}
+        <a class="block text-sm text-bluish-500 underline italic mb-2" href="/register">Don't have an account? Press here to create one.</a>
+        <button class="block w-full transition-all px-4 py-2 text-lg bg-bluish-500 text-bluish-100 hover:bg-bluish-300 hover:text-black">Login</button>
+    </form>
+</div>
+
+{% endblock %}
